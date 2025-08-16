@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import plotly.express as px
+from pathlib import Path
 
 st.title("ALCHEMIST - Sample Input")
 
@@ -14,15 +15,21 @@ The framework utilizes out-of-fold predictions as additional features to capture
 Enter your component data below to experience the power of our predictive alchemical transformation.
 """)
 
+# Get the directory where the script is located
+APP_DIR = Path(__file__).parent
+IMG_PATH = APP_DIR / "Framework.png"
+TEST_CSV_PATH = APP_DIR / "test.csv"
+TRAIN_CSV_PATH = APP_DIR / "train_processed.csv"
+
 # Display the framework images
 col1, col2 = st.columns([1, 2])
 
 with col1:
-    st.image("Framework.png", caption="ALCHEMIST Framework Architecture",
+    st.image(str(IMG_PATH), caption="ALCHEMIST Framework Architecture",
              use_container_width=True)
 
 with col2:
-    st.image("Framework.png", caption="ALCHEMIST Implementation Details",
+    st.image(str(IMG_PATH), caption="ALCHEMIST Implementation Details",
              use_container_width=True)
 
 # Initialize all session state variables
@@ -56,7 +63,7 @@ with col2:
     if st.button("Load Demo Data"):
         # Load default test data from test.csv (invisible to user)
         try:
-            default_df = pd.read_csv("test.csv")
+            default_df = pd.read_csv(str(TEST_CSV_PATH))
             if len(default_df) > 0:
                 st.session_state.uploaded_df = default_df
                 st.session_state.available_ids = default_df['ID'].tolist()
@@ -404,7 +411,7 @@ if st.button("Make Predictions with TabPFN"):
 
     try:
         # Load and shuffle training data, then select samples
-        train_data_full = pd.read_csv("train_processed.csv")
+        train_data_full = pd.read_csv(str(TRAIN_CSV_PATH))
         train_data_shuffled = train_data_full.sample(frac=1,
                                                      random_state=42).reset_index(
             drop=True)
