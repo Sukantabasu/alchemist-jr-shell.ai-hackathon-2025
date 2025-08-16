@@ -1,36 +1,97 @@
+# Copyright (C) 2025 Sukanta Basu
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+"""
+File: app.py
+==========================
+
+:Author: Sukanta Basu
+:Date: 2025-8-15
+:Description: streamlit app for ALCHEMIST Jr.
+
+AI Assistance: Claude.AI (Anthropic) is used for documentation, code
+restructuring, and performance optimization.
+"""
+
+
+# ============================================================
+# Imports
+# ============================================================
+
 import streamlit as st
 import pandas as pd
 import numpy as np
 import plotly.express as px
 from pathlib import Path
 
-st.title("ALCHEMIST - Sample Input")
+st.title("ALCHEMIST Jr. - *Turn Fuel Data into Gold (Quickly)*")
+st.markdown("#### A lightweight version of ALCHEMIST: "
+           "<u>A</u>IML-powered <u>L</u>ow-<u>c</u>ost <u>H</u>igh-octane <u>E</u>co-fuel "
+           "<u>M</u>ixture <u>I</u>dentification <u>S</u>trategy & <u>T</u>oolkit",
+           unsafe_allow_html=True)
 
 # Introduction text
 st.markdown("""
-Welcome to ALCHEMIST, an advanced machine learning framework for predicting fuel blend properties. 
-This sophisticated system employs a multi-stage ensemble approach combining AutoGluon, RealMLP, and TabPFN models.
-Our methodology processes component fractions and properties through engineered features to deliver accurate predictions.
-The framework utilizes out-of-fold predictions as additional features to capture complex inter-target correlations.
-Enter your component data below to experience the power of our predictive alchemical transformation.
+As part of the SHELL.ai hackathon of 2025, we developed the ALCHEMIST 
+framework to predict chemical properties of synthetically blended fuels. The 
+entire codebase is available on 
+[GitHub](https://github.com/Sukantabasu/alchemist-shell.ai-hackathon-2025). 
+The associated documentation can be found 
+[here](https://alchemist-shellai-hackathon-2025.readthedocs.io/en/latest/). 
+The trained model weights can be downloaded from
+[Hugging Face](https://huggingface.co/datasets/sukantabasu/alchemist-shell.ai-hackathon-2025). 
+The original ALCHEMIST framework is comprehensive and makes use of several 
+state-of-the-art AIML models: 
+[AutoGluon](https://auto.gluon.ai/), 
+[RealMLP](https://github.com/dholzmueller/pytabkit), and 
+[TabPFN](https://github.com/PriorLabs/TabPFN).
+""")
+
+st.markdown("""
+In this Streamlit app, we present 
+[ALCHEMIST Jr.](https://github.com/Sukantabasu/alchemist-jr-shell.ai-hackathon-2025), 
+a lightweight version of the original framework designed for quick 
+experimentation. This interactive implementation enables users to make fuel 
+blend property predictions in real-time without the computational complexity of 
+the full ALCHEMIST framework.
+
+In the figure below, we compare the ALCHEMIST (left panel) and 
+ALCHEMIST Jr. (right panel) frameworks.  
 """)
 
 # Get the directory where the script is located
 APP_DIR = Path(__file__).parent
-IMG_PATH = APP_DIR / "Framework.png"
+IMG1_PATH = APP_DIR / "Alchemist_combo.png"
+IMG2_PATH = APP_DIR / "Alchemist_Jr_combo.png"
 TEST_CSV_PATH = APP_DIR / "test.csv"
 TRAIN_CSV_PATH = APP_DIR / "train_processed.csv"
 
 # Display the framework images
-col1, col2 = st.columns([1, 2])
+col1, col2 = st.columns([1.8, 1])
 
 with col1:
-    st.image(str(IMG_PATH), caption="ALCHEMIST Framework Architecture",
-             use_container_width=True)
-
+    st.image(str(IMG1_PATH), width=450)
 with col2:
-    st.image(str(IMG_PATH), caption="ALCHEMIST Implementation Details",
-             use_container_width=True)
+    st.image(str(IMG2_PATH), width=230)
+
+st.markdown("""
+Please note that ALCHEMIST Jr. achieves lower accuracy compared to the full 
+ALCHEMIST framework, as it does not employ ensemble modeling strategies or 
+account for cross-correlations among target properties. This trade-off enables 
+faster computation for exploratory purposes.
+""")
 
 # Initialize all session state variables
 if 'property_data' not in st.session_state:
@@ -56,8 +117,8 @@ st.subheader("Load Data File")
 col1, col2 = st.columns([3, 1])
 
 with col1:
-    uploaded_file = st.file_uploader("Upload CSV or Excel file",
-                                     type=['csv', 'xlsx'])
+    uploaded_file = st.file_uploader("Upload CSV or Excel file", type=['csv', 'xlsx'],
+                                     help="File should have the same format as test.csv from the SHELL.ai hackathon")
 
 with col2:
     if st.button("Load Demo Data"):
@@ -142,7 +203,7 @@ if 'uploaded_df' in st.session_state and 'available_ids' in st.session_state:
         st.rerun()
 
 # Component fractions section
-st.subheader("Component Fractions")
+st.subheader("Blend Composition")
 col1, col2, col3, col4, col5, col6 = st.columns(6)
 
 with col1:
@@ -238,7 +299,7 @@ for prop in range(1, 11):
     for comp in range(1, 6):
         comp_key = f"Component{comp}_Property{prop}"
         chart_data.append({
-            'Property': f"P{prop}",
+            'Property': f"P{prop:02d}",
             'Component': f"C{comp}",
             'Value': st.session_state.property_data[comp_key]
         })
@@ -262,7 +323,7 @@ if st.button("Generate Engineered Features"):
             property_value = st.session_state.property_data[property_key]
             contribution = fraction * property_value
             contributions_data.append({
-                'Feature': f'C{comp}_Contribution_P{prop}',
+                'Feature': f'C{comp}_Contribution_P{prop:02d}',
                 'Value': contribution
             })
 
@@ -279,7 +340,7 @@ if st.button("Generate Engineered Features"):
             weighted_sum += fraction * property_value
 
         weighted_avg_data.append({
-            'Feature': f'WeightedAvg_P{prop}',
+            'Feature': f'WeightedAvg_P{prop:02d}',
             'Value': weighted_sum
         })
 
@@ -328,15 +389,15 @@ if st.session_state.feature_results is not None:
         # Reverse the y-axis order to show P1 at top, P10 at bottom
         fig_eng.update_layout(yaxis={'categoryorder': 'array',
                                      'categoryarray': ['WeightedAvg_P10',
-                                                       'WeightedAvg_P9',
-                                                       'WeightedAvg_P8',
-                                                       'WeightedAvg_P7',
-                                                       'WeightedAvg_P6',
-                                                       'WeightedAvg_P5',
-                                                       'WeightedAvg_P4',
-                                                       'WeightedAvg_P3',
-                                                       'WeightedAvg_P2',
-                                                       'WeightedAvg_P1']})
+                                                       'WeightedAvg_P09',
+                                                       'WeightedAvg_P08',
+                                                       'WeightedAvg_P07',
+                                                       'WeightedAvg_P06',
+                                                       'WeightedAvg_P05',
+                                                       'WeightedAvg_P04',
+                                                       'WeightedAvg_P03',
+                                                       'WeightedAvg_P02',
+                                                       'WeightedAvg_P01']})
 
         fig_eng.update_traces(
             marker=dict(color='#3498db', opacity=0.8)
@@ -364,7 +425,7 @@ if st.session_state.feature_results is not None:
         st.markdown('</div>', unsafe_allow_html=True)
 
 # Prediction section
-st.subheader("ALCHEMIST Lightweight Predictions")
+st.subheader("ALCHEMIST Jr. Predictions")
 
 # Target selection
 target_names = [f"BlendProperty{i + 1}" for i in range(10)]
@@ -380,7 +441,7 @@ if num_samples > 500:
 if num_samples == 1000:
     st.error("⚠️ 1000 samples may cause timeout or performance issues!")
 
-if st.button("Make Predictions with TabPFN"):
+if st.button("Make Predictions with TabPFN (v2)"):
 
     # Prepare current sample data with engineered features
     current_sample = []
@@ -406,8 +467,6 @@ if st.button("Make Predictions with TabPFN"):
             property_value = st.session_state.property_data[property_key]
             weighted_sum += fraction * property_value
         current_sample.append(weighted_sum)
-
-    st.write(f"Total engineered features: {len(current_sample)}")
 
     try:
         # Load and shuffle training data, then select samples
@@ -471,8 +530,8 @@ if st.button("Make Predictions with TabPFN"):
             )
 
             fig_history.update_layout(
-                xaxis_title="Number of Training Samples",
-                yaxis_title="Prediction Value",
+                xaxis_title="Training Sample Size",
+                yaxis_title="Predicted Value",
                 showlegend=False,
                 height=300,
                 margin=dict(l=0, r=0, t=20, b=0)
