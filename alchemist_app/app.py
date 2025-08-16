@@ -425,7 +425,7 @@ if st.session_state.feature_results is not None:
         st.markdown('</div>', unsafe_allow_html=True)
 
 # Prediction section
-st.subheader("ALCHEMIST Jr. Predictions")
+st.subheader("Predictions by ALCHEMIST Jr.")
 
 # Target selection
 target_names = [f"BlendProperty{i + 1}" for i in range(10)]
