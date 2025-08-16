@@ -22,3 +22,5 @@ a lightweight version of the original framework designed for quick
 experimentation. This interactive implementation enables users to make fuel 
 blend property predictions in real-time without the computational complexity of 
 the full ALCHEMIST framework.
+
+<img src="Alchemist_Jr_attribution.png" width="200" alt="Alchemist Jr.">
